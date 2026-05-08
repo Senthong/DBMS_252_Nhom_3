@@ -117,24 +117,29 @@ LIMIT 20;
   };
 
   const runSubquery = async () => {
-    setQueryTitle("Subquery");
-    setQuerySQL(`
-SELECT order_id
-FROM orders
-WHERE order_id IN (
-    SELECT order_id
-    FROM order_payments
-    WHERE payment_value >
-    (
-        SELECT AVG(payment_value)
-        FROM order_payments
-    )
-)
-LIMIT 20;
-    `);
-    const res = await API.get("/high-value-orders");
-    setQueryResult(res.data);
-  };
+  setQueryTitle("Subquery - High Value Orders");
+
+  const res = await API.get("/high-value-orders");
+
+  const cleaned = res.data
+    .map((row) => {
+
+      if (typeof row === "string") {
+        return { order_id: row };
+      }
+
+ 
+      if (Array.isArray(row)) {
+        return { order_id: row[0] };
+      }
+
+
+      return { order_id: row.order_id };
+    })
+    .filter((x) => x.order_id);
+
+  setQueryResult(cleaned);
+};
 
   const runAggregate = async () => {
     setQueryTitle("Aggregate Query");
