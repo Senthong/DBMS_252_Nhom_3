@@ -149,21 +149,17 @@ def get_products(page: int = 1, limit: int = 8, db: Session = Depends(get_db)):
         SELECT 
             p.product_id,
             p.product_category_name AS category,
-
-            -- fake name
             CONCAT(p.product_category_name, ' ', p.product_id) AS name,
-
-            -- avg price từ order_items
             COALESCE(AVG(oi.price), 0) AS price,
-
             COUNT(oi.order_id) AS sold_count,
-
             CONCAT('https://picsum.photos/seed/', p.product_id, '/300/300') AS image
 
         FROM public.products p
         LEFT JOIN public.order_items oi
             ON p.product_id = oi.product_id
-        GROUP BY p.product_id
+
+        GROUP BY p.product_id, p.product_category_name
+
         ORDER BY sold_count DESC
         LIMIT :limit OFFSET :offset
     """), {"limit": limit, "offset": offset}).fetchall()
