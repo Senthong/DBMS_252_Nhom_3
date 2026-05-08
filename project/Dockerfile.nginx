@@ -1,0 +1,44 @@
+FROM node:20-alpine AS build1
+WORKDIR /app
+COPY member1_indexing/frontend/package.json .
+RUN npm install
+COPY member1_indexing/frontend .
+RUN npm run build
+
+FROM node:20-alpine AS build2
+WORKDIR /app
+COPY member2_query/frontend/package.json .
+RUN npm install
+COPY member2_query/frontend .
+RUN npm run build
+
+FROM node:20-alpine AS build3
+WORKDIR /app
+COPY member3_transaction/frontend/package.json .
+RUN npm install
+COPY member3_transaction/frontend .
+RUN npm run build
+
+FROM node:20-alpine AS build4
+WORKDIR /app
+COPY member4_concurrency/frontend/package.json .
+RUN npm install
+COPY member4_concurrency/frontend .
+RUN npm run build
+
+FROM node:20-alpine AS build5
+WORKDIR /app
+COPY member5_backup/frontend/package.json .
+RUN npm install
+COPY member5_backup/frontend .
+RUN npm run build
+
+FROM nginx:alpine
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY portal/index.html /usr/share/nginx/html/portal/index.html
+COPY --from=build1 /app/dist /usr/share/nginx/html/member1
+COPY --from=build2 /app/dist /usr/share/nginx/html/member2
+COPY --from=build3 /app/dist /usr/share/nginx/html/member3
+COPY --from=build4 /app/dist /usr/share/nginx/html/member4
+COPY --from=build5 /app/dist /usr/share/nginx/html/member5
+EXPOSE 80

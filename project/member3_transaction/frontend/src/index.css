@@ -1,0 +1,32 @@
+:root {
+  --navy:      #1a2332;
+  --navy-deep: #111b28;
+  --navy-mid:  #243040;
+  --cream:     #f5f2ed;
+  --cream-dark:#ede8e0;
+  --white:     #ffffff;
+  --gold:      #b89a6a;
+  --gold-light:#d4b896;
+  --text-body: #2c3e50;
+  --text-muted:#7a8a9a;
+  --green-ok:  #2d6a4f;
+  --red-err:   #8b1a1a;
+
+  --font-serif:  'Playfair Display', Georgia, serif;
+  --font-body:   'Jost', 'Segoe UI', sans-serif;
+  --font-light:  'Cormorant Garamond', Georgia, serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--text-body);
+  min-height: 100vh;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream-dark); }
+::-webkit-scrollbar-thumb { background: var(--navy-mid); border-radius: 3px; }

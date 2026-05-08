@@ -1,0 +1,96 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: ecommerce_pg
+    environment:
+      POSTGRES_DB: ecommerce
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./shared/schemas:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d ecommerce"]
+      interval: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --appendonly yes
+    volumes:
+      - redisdata:/data
+
+  backend1:
+    build: ./member1_indexing/backend
+    container_name: backend_indexing
+    ports: ["8001:8001"]
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/ecommerce
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  backend2:
+    build: ./member2_query/backend
+    container_name: backend_query
+    ports: ["8002:8002"]
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/ecommerce
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  backend3:
+    build: ./member3_transaction/backend
+    container_name: backend_transaction
+    ports: ["8003:8003"]
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/ecommerce
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  backend4:
+    build: ./member4_concurrency/backend
+    container_name: backend_concurrency
+    ports: ["8004:8004"]
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/ecommerce
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  backend5:
+    build: ./member5_backup/backend
+    container_name: backend_backup
+    ports: ["8005:8005"]
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/ecommerce
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: ecommerce_nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+      - backend4
+      - backend5
+
+volumes:
+  pgdata:
+  redisdata:

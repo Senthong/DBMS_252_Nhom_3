@@ -1,0 +1,26 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routers import transaction
+
+app = FastAPI(
+    title="Transaction API – Topic IV",
+    description="Demonstrates ACID transactions in PostgreSQL and Redis",
+    version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(transaction.router, prefix="/api/transaction", tags=["Transaction"])
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "service": "member3_transaction"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8003, reload=True)
